@@ -51,22 +51,20 @@ class Population(val population: List[Individual], fitness:Int) {
     population(abs(rnd.nextInt(population.length)))
   }
 
-  def performComputation(crossPerc:Double, mutatePerc:Double): Population = {
-    print("Crossing... ")
-    val crossRes = this.cross((crossPerc * population.length).toInt)
-    println(crossRes.length)
+  def performComputation(crossPopulationPercent:Double, mutatePopulationPercent:Double): Population = {
 
-    print("Mutating...")
-    val mutateRes = this.mutate((mutatePerc * population.length).toInt)
-    println(mutateRes.length)
+    def populationPercentToNumber(populationPercent:Double): Int = {
+      (populationPercent * population.length).toInt
+    }
 
-    print("Adding random...")
-    val randomRes = this.fillWithRandom(population.length - crossRes.length - mutateRes.length)
-    println(randomRes.length)
+    val rest = BigDecimal(1.0 - crossPopulationPercent - mutatePopulationPercent)
+      .setScale(1, BigDecimal.RoundingMode.HALF_UP)
+      .toDouble
 
-    new Population(crossRes
-      ++ mutateRes
-      ++ randomRes
+    new Population(
+      cross(populationPercentToNumber(crossPopulationPercent))
+      ++ mutate(populationPercentToNumber(mutatePopulationPercent))
+      ++ fillWithRandom(populationPercentToNumber(rest))
       , fitness)
   }
 
