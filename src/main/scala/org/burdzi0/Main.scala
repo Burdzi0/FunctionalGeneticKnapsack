@@ -18,16 +18,16 @@ object Main {
 
     val populationGenerator = new PopulationGenerator(knapsack, 18)
 
-    var population = populationGenerator.generatePopulation(12 * 1000)
+    var population = populationGenerator.generatePopulation(10 * 1000)
 
     println("Start")
+
     for(phase <- 1 to 5) {
       println("Phase: " + phase)
-      population = population.performComputation(0.4, 0.4)
-      println("LENGTH: " + population.population.length)
+      population = population.performComputation(0.4, 0.5)
+      println()
     }
 
     println(population.getBest())
-    population.printPopulation()
   }
 }

@@ -18,8 +18,9 @@ class Individual(val bits:List[Boolean], knapsack: Knapsack) {
     )
 
     if (mutRes.calculateFitness() > fitness) {
-      new Individual(bits.map(_ => false), knapsack)
+      mutRes = new Individual(bits.map(_ => false), knapsack)
     }
+
     mutRes
   }
 
@@ -27,23 +28,41 @@ class Individual(val bits:List[Boolean], knapsack: Knapsack) {
     new Individual(this.bits.updated(bit, !bits(bit)), knapsack)
   }
 
-  def cross(individual: Individual): List[Individual] = {
-    val crossingPlace = randomAbsolute(this.bits.length)
-
-    def cutBitsLists(first: Individual, second: Individual): List[Boolean] = {
+  def cross(individual: Individual, fitness:Int): List[Individual] = {
+    def cutBitsLists(first: Individual, crossingPlace:Int, second: Individual): List[Boolean] = {
       first.bits.take(crossingPlace) ++ second.bits.drop(crossingPlace)
     }
 
-    new Individual(cutBitsLists(this, individual), knapsack)::
-    new Individual(cutBitsLists(individual, this), knapsack)::Nil
-  }
+    var crossingPlace = randomAbsolute(this.bits.length)
+    var first = new Individual(cutBitsLists(this, crossingPlace, individual), knapsack)
+    var second = new Individual(cutBitsLists(individual, crossingPlace, this), knapsack)
 
-  def +(individual: Individual) : List[Individual] = {
-    this.cross(individual)
+    1.to(5)
+      .iterator
+      .takeWhile(_ => first.calculateFitness() > fitness && second.calculateFitness() > fitness)
+      .foreach(_ => {
+        crossingPlace = randomAbsolute(this.bits.length)
+        first = new Individual(cutBitsLists(this, crossingPlace, individual), knapsack)
+        second = new Individual(cutBitsLists(individual, crossingPlace, this), knapsack)
+      })
+
+    if (first.calculateFitness() > fitness) {
+      first = new Individual(bits.map(_ => false), knapsack)
+    }
+
+    if (second.calculateFitness() > fitness) {
+      second = new Individual(bits.map(_ => false), knapsack)
+    }
+
+    first::second::Nil
   }
 
   def calculateFitness():Int = {
     bits.zip(knapsack.elements).map(tuple => if (tuple._1) tuple._2.weight else 0).sum
+  }
+
+  def calculateValue():Int = {
+    bits.zip(knapsack.elements).map(tuple => if (tuple._1) tuple._2.value else 0).sum
   }
 
   def >(individual: Individual): Individual = {
@@ -57,6 +76,6 @@ class Individual(val bits:List[Boolean], knapsack: Knapsack) {
 
   override def toString: String = {
     "[Bits]: " + bits.map(b => if (b) 1 else 0).toString() +
-    "[F]: " + calculateFitness()
+    " [F]: " + calculateFitness() + " \t[V]: " + calculateValue()
   }
 }

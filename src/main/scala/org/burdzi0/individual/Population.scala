@@ -14,7 +14,7 @@ class Population(val population: List[Individual], fitness:Int) {
     def crossTailRec(size:Int, list: List[List[Individual]]) : List[Individual] = {
       size match {
         case 0 => list.flatten
-        case s if s > 0 => crossTailRec(s - 2, chooseRandomIndividual().cross(chooseRandomIndividual())::list)
+        case s if s > 0 => crossTailRec(s - 2, chooseRandomIndividual().cross(chooseRandomIndividual(), fitness)::list)
       }
     }
 
@@ -52,15 +52,17 @@ class Population(val population: List[Individual], fitness:Int) {
   }
 
   def performComputation(crossPerc:Double, mutatePerc:Double): Population = {
-    println("Performing computation - cross: " + crossPerc + " mutate: " + mutatePerc)
     print("Crossing... ")
     val crossRes = this.cross((crossPerc * population.length).toInt)
     println(crossRes.length)
+
     print("Mutating...")
     val mutateRes = this.mutate((mutatePerc * population.length).toInt)
     println(mutateRes.length)
-    println("Adding random...")
+
+    print("Adding random...")
     val randomRes = this.fillWithRandom(population.length - crossRes.length - mutateRes.length)
+    println(randomRes.length)
 
     new Population(crossRes
       ++ mutateRes
